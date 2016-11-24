@@ -17,7 +17,7 @@ include Scraper
         @available_urls << url
       end
     else
-      Scraper.scrape_urls(@brand)
+      scrape_urls(@brand)
       Csv.push_all_to_file(filename, @available_urls)
     end
   end

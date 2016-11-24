@@ -6,7 +6,7 @@ class WatchList
   end
 
   def load_watches(filename)
-    watches_arr = CsvParser.parse(filename)
+    watches_arr = Csv.parse_to_hash(filename)
 
     watches_arr.each do |watch|
       @watches << Watch.new(watch)

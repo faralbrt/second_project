@@ -1,5 +1,3 @@
-require 'watir'
-require 'nokogiri'
 require_relative 'model/watch_list'
 require_relative 'model/watch'
 require_relative 'model/csv_parser'

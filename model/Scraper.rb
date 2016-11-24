@@ -7,7 +7,7 @@ require_relative 'csv_module'
 
 module Scraper
 
-  def scrape_urls(brand)
+  def scrape_urls_by_brand(brand)
     count = 1
     browser = Watir::Browser.new(:firefox)
     puts "ready?"
@@ -36,6 +36,31 @@ module Scraper
     return
   end
 
+  def scrape_urls
+    count = 1
+    browser = Watir::Browser.new(:firefox)
+    puts "ready?"
+    gets.chomp
+    browser.goto("http://www.jomashop.com/#{@category}.html" + "?p=#{count}")
+    sleep(5)
+    loop do
+      sleep(rand(3.0))
+      count += 1
+      new_url = browser.url.to_s
+      new_url = new_url.sub(/(?<==).*/, "#{count}")
+      browser.goto(new_url)
+      sleep(4)
+      page = Nokogiri::HTML.parse(browser.html)
+      break if page.css(".item").empty?
+      page.css(".item").each do |item|
+        @available_urls << item.at_css(".price-link")['href']
+        Csv.push_to_file(@filename, [item.at_css(".price-link")['href']])
+      end
+    end
+    browser.close
+    return
+  end
+
   def scrape_watches
     watch_list = WatchList.new
     watches_to_scrape = watch_list.load_watches("#{@brand}.csv")
@@ -45,12 +70,12 @@ module Scraper
     gets.chomp
 
     watches_to_scrape.each do |watch|
-      match = @available_urls.find { |item| item.include?(watch.model.downcase) }
+      match = @available_urls.find { |item| item.gsub(/\W*/, "").include?(watch.model..gsub(/\W*/, "").downcase) }
       if match
         browser.goto(match)
+        sleep(rand(5))
         page_html = Nokogiri::HTML.parse(browser.html)
         brand = page_html.xpath(".//*[@id='Brand']").text.strip
-        model = page_html.xpath(".//*[@id='Model']").text.strip
         type_of_sale = page_html.xpath(".//*[@id='product_addtocart_form']/div[2]/div[2]/div[1]/span/span")
         final_price = page_html.xpath(".//*[@id='final-price']").text.strip
         availability = page_html.xpath(".//*[@id='product_addtocart_form']/div[2]/div[2]/div[2]/div[1]/span/span/span[1]").text.strip
@@ -58,9 +83,9 @@ module Scraper
         if type_of_sale
           type_of_sale = type_of_sale.text.strip
         end
-        info = {"brand" => brand, "model" => model, "final_price" => final_price, "availability" => availability, "shipping" => shipping,  "type_of_sale" => type_of_sale}
-          @joma_watches << JomaWatch.new(info)
-        sleep(rand(5))
+        info = {"brand" => brand, "model" => watch.model, "final_price" => final_price, "availability" => availability, "shipping" => shipping,  "type_of_sale" => type_of_sale}
+        p info
+        @joma_watches << JomaWatch.new(info)
       end
     end
     browser.close

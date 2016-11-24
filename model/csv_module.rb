@@ -18,14 +18,14 @@ module Csv
     converted_rows
   end
 
-  def self.push_all_to_file(filename, array)
-    array.each do |object|
-      push_to_file(filename, object)
-    end
-  end
+  # def self.push_all_to_file(filename, array)
+  #   array.each do |object|
+  #     push_to_file(filename, object)
+  #   end
+  # end
 
 
-  def push_to_file(filename, object)
+  def self.push_to_file(filename, object)
     CSV.open(filename, 'w') do |csv_row|
       csv_row << object
     end

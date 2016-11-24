@@ -22,11 +22,8 @@ include Scraper
     end
   end
 
-  def scrape(watches)
-    watches.each do |watch|
-      result = Scraper.scrape_product(watch.model)  
-
-    end
+  def scrape
+    scrape_watches
   end
 
   def push_results

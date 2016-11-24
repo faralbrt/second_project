@@ -1,13 +1,14 @@
 require 'watir'
 require 'nokogiri'
-require_relative 'watch_list'
-require_relative 'watch'
-require_relative 'csv_parser'
+require_relative 'model/watch_list'
+require_relative 'model/watch'
+require_relative 'model/csv_parser'
 
 watch_list = WatchList.new
-watches = watch_list.load_watches('movado_and_citizen.csv')
+watches = watch_list.load_watches('model/movado.csv')
 
 browser = Watir::Browser.new(:firefox)
+
 gets.chomp
 
 watches.each do |watch|

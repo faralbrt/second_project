@@ -1,10 +1,10 @@
 class Watch
 
-	attr_reader :brand, :model, :url
+	attr_reader :brand, :model
 
 	def initialize(args)
-		@brand = "citizen"
-		@model = args.fetch("citizen", nil)
-		@url = "http://www.jomashop.com/citizen-watch-#{@model.downcase}.html"
+		@brand = args.keys[0]
+		@model = args.values[0]
 	end
+
 end

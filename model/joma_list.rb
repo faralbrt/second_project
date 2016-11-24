@@ -1,5 +1,8 @@
+require_relative 'Scraper'
+
 class JomaList
 
+include Scraper
 
   def initialize(brand)
     @joma_watches = []
@@ -14,7 +17,7 @@ class JomaList
         @available_urls << url
       end
     else
-      @available_urls = Scraper.scrape_urls(@brand)
+      Scraper.scrape_urls(@brand)
       Csv.push_all_to_file(filename, @available_urls)
     end
   end

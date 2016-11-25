@@ -7,4 +7,5 @@ require_relative 'Scraper'
 
 
 scraper = JomaList.new({"filename" => 'all_urls.csv'})
-scraper.scrape_all_urls(1,7)
+scraper.grab_urls
+scraper.scrape

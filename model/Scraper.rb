@@ -62,29 +62,35 @@ module Scraper
 
   def scrape_watches
     watch_list = WatchList.new
-    watches_to_scrape = watch_list.load_watches("watches_to_scrape.csv")
+    watches_to_scrape = watch_list.load_watches('watches_to_scrape.csv')
 
     browser = Watir::Browser.new(:firefox)
     puts "ready?"
     gets.chomp
 
-    watches_to_scrape.each do |watch|
-      match = @available_urls.find { |item| item.gsub(/\W*/, "").include?(watch.model..gsub(/\W*/, "").downcase) }
-      if match
-        browser.goto(match)
-        sleep(rand(5))
-        page_html = Nokogiri::HTML.parse(browser.html)
-        brand = page_html.xpath(".//*[@id='Brand']").text.strip
-        type_of_sale = page_html.xpath(".//*[@id='product_addtocart_form']/div[2]/div[2]/div[1]/span/span")
-        final_price = page_html.xpath(".//*[@id='final-price']").text.strip
-        availability = page_html.xpath(".//*[@id='product_addtocart_form']/div[2]/div[2]/div[2]/div[1]/span/span/span[1]").text.strip
-        shipping = page_html.xpath(".//*[@id='product_addtocart_form']/div[2]/div[2]/div[2]/div[1]/span/span/span[2]").text.strip
-        if type_of_sale
-          type_of_sale = type_of_sale.text.strip
+    counter = 1
+    CSV.open('../jomashop_results.csv', "w") do |csv_row|
+      watches_to_scrape.each do |watch|
+        match = @available_urls.find { |item| item.gsub(/\W*/, "").include?(watch.model.gsub(/\W*/, "").downcase) }
+        if match
+          browser.goto(match)
+          sleep(rand(3.0))
+          page_html = Nokogiri::HTML.parse(browser.html)
+          brand = page_html.xpath(".//*[@id='Brand']").text.strip
+          type_of_sale = page_html.xpath(".//*[@id='product_addtocart_form']/div[2]/div[2]/div[1]/span/span")
+          final_price = page_html.xpath(".//*[@id='final-price']").text.strip
+          availability = page_html.xpath(".//*[@id='product_addtocart_form']/div[2]/div[2]/div[2]/div[1]/span/span/span[1]").text.strip
+          shipping = page_html.xpath(".//*[@id='product_addtocart_form']/div[2]/div[2]/div[2]/div[1]/span/span/span[2]").text.strip
+          if type_of_sale
+            type_of_sale = type_of_sale.text.strip
+          end
+          info = {"brand" => brand, "model" => watch.model, "final_price" => final_price, "availability" => availability, "shipping" => shipping,  "type_of_sale" => type_of_sale}
+          p info
+          puts "Count: #{counter}"
+          counter +=1
+          csv_row << info.values
+          @joma_watches << JomaWatch.new(info)
         end
-        info = {"brand" => brand, "model" => watch.model, "final_price" => final_price, "availability" => availability, "shipping" => shipping,  "type_of_sale" => type_of_sale}
-        p info
-        @joma_watches << JomaWatch.new(info)
       end
     end
     browser.close

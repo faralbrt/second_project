@@ -27,8 +27,4 @@ class JomaList
     scrape_watches
   end
 
-  def push_results
-
-  end
-
 end

@@ -3,8 +3,8 @@ class Watch
 	attr_reader :brand, :model
 
 	def initialize(args)
-		@brand = args.keys[0]
-		@model = args.values[0]
+		@brand = args.fetch("brand", "n/a")
+		@model = args.fetch("model", "n/a")
 	end
 
 end

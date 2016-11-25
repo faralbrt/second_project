@@ -1,9 +1,6 @@
 require 'watir'
 require 'nokogiri'
-require_relative 'watch_list'
-require_relative 'watch'
-require_relative 'joma_watch'
-require_relative 'csv_module'
+require 'csv'
 
 module Scraper
 
@@ -36,25 +33,27 @@ module Scraper
     return
   end
 
-  def scrape_urls
-    count = 1
+  def scrape_urls(count,finish)
     browser = Watir::Browser.new(:firefox)
     puts "ready?"
     gets.chomp
     browser.goto("http://www.jomashop.com/#{@category}.html" + "?p=#{count}")
-    sleep(5)
-    loop do
-      sleep(rand(3.0))
-      count += 1
-      new_url = browser.url.to_s
-      new_url = new_url.sub(/(?<==).*/, "#{count}")
-      browser.goto(new_url)
-      sleep(4)
-      page = Nokogiri::HTML.parse(browser.html)
-      break if page.css(".item").empty?
-      page.css(".item").each do |item|
-        @available_urls << item.at_css(".price-link")['href']
-        Csv.push_to_file(@filename, [item.at_css(".price-link")['href']])
+    sleep(6)
+    CSV.open(@filename, "w") do |csv_row|
+      until count >= finish
+        sleep(rand(1.0))
+        sleep(2)
+        page = Nokogiri::HTML.parse(browser.html)
+        break if page.css(".item").empty?
+        page.css(".item").each do |item|
+          @available_urls << item.at_css(".price-link")['href']
+          csv_row << [item.at_css(".price-link")['href']]
+        end
+        new_url = browser.url.to_s
+        new_url = new_url.sub(/(?<==).*/, "#{count}")
+        puts "count - #{count} URL's = #{@available_urls.length}"
+        count += 1
+        browser.goto(new_url)
       end
     end
     browser.close
@@ -63,7 +62,7 @@ module Scraper
 
   def scrape_watches
     watch_list = WatchList.new
-    watches_to_scrape = watch_list.load_watches("#{@brand}.csv")
+    watches_to_scrape = watch_list.load_watches("watches_to_scrape.csv")
 
     browser = Watir::Browser.new(:firefox)
     puts "ready?"
@@ -92,3 +91,4 @@ module Scraper
   end
 
 end
+

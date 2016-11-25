@@ -26,7 +26,7 @@ module Csv
 
 
   def self.push_to_file(filename, object)
-    CSV.open(filename, 'w') do |csv_row|
+    CSV.open(filename, "w") do |csv_row|
       csv_row << object
     end
   end

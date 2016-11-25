@@ -60,6 +60,32 @@ module Scraper
     return
   end
 
+  def scrape_all_urls(count,finish)
+    browser = Watir::Browser.new(:firefox)
+    puts "ready?"
+    gets.chomp
+    browser.goto("http://www.jomashop.com/media/sitemaps/sitemap_00#{count}.xml")
+    sleep(6)
+    CSV.open(@filename, "w") do |csv_row|
+      until count > finish
+        sleep(rand(1.0))
+        sleep(6)
+        page = Nokogiri::HTML.parse(browser.html)
+        page.css("url").each do |item|
+          if item.at_css("loc").text.include?(".html")
+            @available_urls << item.at_css("loc").text
+            csv_row << [item.at_css("loc").text]
+          end
+        end
+        puts "count - #{count} URL's = #{@available_urls.length}"
+        count += 1
+        browser.goto("http://www.jomashop.com/media/sitemaps/sitemap_00#{count}.xml")
+      end
+    end
+    browser.close
+    return
+  end
+
   def scrape_watches
     watch_list = WatchList.new
     watches_to_scrape = watch_list.load_watches('watches_to_scrape.csv')
@@ -95,6 +121,7 @@ module Scraper
     end
     browser.close
   end
+
 
 end
 

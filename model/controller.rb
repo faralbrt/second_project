@@ -6,7 +6,5 @@ require_relative 'joma_list'
 require_relative 'Scraper'
 
 
-scraper = JomaList.new("watches_urls.csv", "watches")
-scraper.grab_urls
-scraper.scrape
-
+scraper = JomaList.new({"filename" => 'all_urls.csv'})
+scraper.scrape_all_urls(1,7)

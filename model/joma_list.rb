@@ -6,11 +6,11 @@ class JomaList
 
   include Scraper
 
-  def initialize(filename, category)
+  def initialize(args)
     @joma_watches = []
     @available_urls = []
-    @filename = filename
-    @category = category
+    @filename = args.fetch("filename", "none")
+    @category = args.fetch("category", "none")
   end
 
   def grab_urls

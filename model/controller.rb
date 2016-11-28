@@ -26,12 +26,14 @@ if ARGV.any?
     watch_list = WatchList.new
     watches_to_scrape = watch_list.load_watches(scrape_file)
     watches_to_scrape.each do |watch|
+      puts "Model: #{watch.model} Brand: #{watch.brand} Count: #{count}"
       matching_url = Scraper.match_to_url(watch, url_list)
+      count += 1
       if matching_url
         scrape_info = Scraper.scrape_watch(browser, matching_url)
         scrape_info["model"] = watch.model
         p scrape_info
-        FileAccessor.push_to_file('jomashop_results.csv', scrape_info.values)
+        FileAccessor.push_to_file('jomashop_other_results.csv', scrape_info.values)
         count += 1
         puts "Count - #{count}"
       end

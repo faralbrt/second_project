@@ -54,40 +54,42 @@ class Scraper
 
 
 
-  def scrape_watches
-    watch_list = WatchList.new
-    watches_to_scrape = watch_list.load_watches('watches_to_scrape.csv')
-
-    browser = Watir::Browser.new(:firefox)
-    puts "ready?"
-    gets.chomp
-
-    counter = 1
-    CSV.open('jomashop_other_results.csv', 'a') do |csv_row|
-      watches_to_scrape.each do |watch|
-        match = @available_urls.find { |item| item.gsub(/\W*/, "").include?(watch.model.gsub(/\W*/, "").downcase) }
-        if match
-          browser.goto(match)
-          sleep(rand(3.0))
-          page_html = Nokogiri::HTML.parse(browser.html)
-          brand = page_html.xpath(".//*[@id='product_addtocart_form']/div[2]/div[2]/div[1]/h1/span[2]").text.strip
-          type_of_sale = page_html.xpath(".//*[@id='product_addtocart_form']/div[2]/div[2]/div[1]/span/span")
-          final_price = page_html.xpath(".//*[@id='final-price']").text.strip
-          availability = page_html.xpath(".//*[@id='product_addtocart_form']/div[2]/div[2]/div[2]/div[1]/span/span/span[1]").text.strip
-          shipping = page_html.xpath(".//*[@id='product_addtocart_form']/div[2]/div[2]/div[2]/div[1]/span/span/span[2]").text.strip
-          if type_of_sale
-            type_of_sale = type_of_sale.text.strip
-          end
-          info = {"brand" => brand, "model" => watch.model, "final_price" => final_price, "availability" => availability, "shipping" => shipping,  "type_of_sale" => type_of_sale}
-          p info
-          puts "Count: #{counter}"
-          counter +=1
-          csv_row << info.values
-          @joma_watches << JomaWatch.new(info)
-        end
-      end
+  def self.scrape_watch(browser, url)
+    if url
+      browser.goto(url)
+      sleep(rand(3.0))
+      parse_product_info(browser.html)
     end
-    browser.close
+  end
+
+  def self.parse_product_info(page)
+    page_html = Nokogiri::HTML.parse(page)
+    brand = page_html.xpath(".//*[@id='product_addtocart_form']/div[2]/div[2]/div[1]/h1/span[2]").text.strip
+    joma_model = page_html.xpath(".//*[@id='Model']").text.strip
+    type_of_sale = page_html.xpath(".//*[@id='product_addtocart_form']/div[2]/div[2]/div[1]/span/span")
+    final_price = page_html.xpath(".//*[@id='final-price']").text.strip
+    availability = page_html.xpath(".//*[@id='product_addtocart_form']/div[2]/div[2]/div[2]/div[1]/span/span/span[1]").text.strip
+    shipping = page_html.xpath(".//*[@id='product_addtocart_form']/div[2]/div[2]/div[2]/div[1]/span/span/span[2]").text.strip
+    if type_of_sale
+      type_of_sale = type_of_sale.text.strip
+    end
+    {"brand" => brand, "joma_model" => joma_model, "final_price" => final_price, "availability" => availability, "shipping" => shipping,  "type_of_sale" => type_of_sale}
+  end
+
+  def self.match_to_url(watch, urls)
+    urls = urls.dup
+    urls.find do |url|
+      url = url.split('com\/').last
+      url.slice!('.html')
+      url.delete!('-')
+      model = keep_alphanumeric_chars(watch.model.split(' ').first)
+      brand = keep_alphanumeric_chars(watch.brand)
+      (url.end_with?(model) && url.include?(brand)) && (url.include?('openbox') == false)
+    end
+  end
+
+  def self.keep_alphanumeric_chars(str)
+    str.gsub(/\W*/, "").downcase
   end
 
 

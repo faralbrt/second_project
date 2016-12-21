@@ -1,0 +1,24 @@
+'.js':
+  'Snippet Name':
+    'prefix': 'jq'
+    'body': '$("$1")$2;'
+  'Snippet ajax':
+    'prefix': 'ja'
+    'body': """
+    $.ajax({
+      method: "$1",
+      url: "$2",
+      data: $3
+      }).done(function(r) {
+        $4
+        }).fail(function(r) {
+          console.log(r);$5
+          });
+    """
+'.erb':
+  'ruby embedded':
+    'prefix': 'er'
+    'body': '<% $1 %>$2'
+  'ruby embedded-equal':
+    'prefix': 'ee'
+    'body': '<%= $1 %>$2'

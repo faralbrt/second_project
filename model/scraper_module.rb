@@ -164,3 +164,4 @@ end
   #   browser.close
   #   return
   # end
+  # ruby controller.rb "scrape" "watches_to_scrape.csv"

@@ -70,21 +70,21 @@ class Scraper
     final_price = page_html.xpath(".//*[@id='final-price']").text.strip
     availability = page_html.xpath(".//*[@id='product_addtocart_form']/div[2]/div[2]/div[2]/div[1]/span/span/span[1]").text.strip
     shipping = page_html.xpath(".//*[@id='Brand']").text.strip
-    retai_price = page_html.xpath(".//*[@id='product_addtocart_form']/div[2]/div[2]/div[2]/div[1]/div[1]/div/ul/li[1]/span").text.strip
-    old_price = page_html.xpath(".//*[@id='product_addtocart_form']/div[2]/div[2]/div[2]/div[1]/div[1]/div/ul/li[2]/span").text.strip
-    description = page_html.xpath(".//*[@id='tab-container-details']/div/div[1]/div").text.strip
-    table_data = [".//*[@id='Brand']", ".//*[@id='Series']", ".//*[@id='Gender']",".//*[@id='Watch Label']",".//*[@id='Movement']",".//*[@id='Dial Type']", ".//*[@id='Dial Color']",".//*[@id='Crystal']", ".//*[@id='Hands']",".//*[@id='Second Markers']", ".//*[@id='Dial Markers']", ".//*[@id='Case Size']", ".//*[@id='Case Material']",".//*[@id='Crown']",".//*[@id='Case Shape']",".//*[@id='Case Back']",".//*[@id='Bezel']",".//*[@id='Band Type']",".//*[@id='Band Type']",".//*[@id='Clasp']",".//*[@id='Water Resistance']", ".//*[@id='Calendar']",".//*[@id='Functions']", ".//*[@id='Features']", ".//*[@id='Style']", ".//*[@id='UPC Code']", ".//*[@id='Internal ID']", ".//*[@id='Product Category']"]
-    table_results = table_data.map do|field|
-      if page_html.xpath(field)
-        page_html.xpath(field).text.strip
-      else
-        ""
-      end
-    end
+    # retai_price = page_html.xpath(".//*[@id='product_addtocart_form']/div[2]/div[2]/div[2]/div[1]/div[1]/div/ul/li[1]/span").text.strip
+    # old_price = page_html.xpath(".//*[@id='product_addtocart_form']/div[2]/div[2]/div[2]/div[1]/div[1]/div/ul/li[2]/span").text.strip
+    # description = page_html.xpath(".//*[@id='tab-container-details']/div/div[1]/div").text.strip
+    # table_data = [".//*[@id='Brand']", ".//*[@id='Series']", ".//*[@id='Gender']",".//*[@id='Watch Label']",".//*[@id='Movement']",".//*[@id='Dial Type']", ".//*[@id='Dial Color']",".//*[@id='Crystal']", ".//*[@id='Hands']",".//*[@id='Second Markers']", ".//*[@id='Dial Markers']", ".//*[@id='Case Size']", ".//*[@id='Case Material']",".//*[@id='Crown']",".//*[@id='Case Shape']",".//*[@id='Case Back']",".//*[@id='Bezel']",".//*[@id='Band Type']",".//*[@id='Band Type']",".//*[@id='Clasp']",".//*[@id='Water Resistance']", ".//*[@id='Calendar']",".//*[@id='Functions']", ".//*[@id='Features']", ".//*[@id='Style']", ".//*[@id='UPC Code']", ".//*[@id='Internal ID']", ".//*[@id='Product Category']"]
+    # table_results = table_data.map do|field|
+    #   if page_html.xpath(field)
+    #     page_html.xpath(field).text.strip
+    #   else
+    #     ""
+    #   end
+    # end
     if type_of_sale
       type_of_sale = type_of_sale.text.strip
     end
-    {"brand" => brand, "joma_model" => joma_model, "final_price" => final_price, "availability" => availability, "shipping" => shipping,  "type_of_sale" => type_of_sale,"description" => description, "table" => table_results.join(" "), "old price" => old_price, "retail price" => retai_price}
+    {"brand" => brand, "joma_model" => joma_model, "final_price" => final_price, "availability" => availability, "shipping" => shipping,  "type_of_sale" => type_of_sale}
   end
 
   def self.match_to_url(watch, urls)

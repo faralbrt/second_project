@@ -3,6 +3,7 @@ require_relative 'csv_module'
 require_relative 'excel_module'
 require_relative 'watch'
 require_relative 'watch_list'
+require 'pry'
 
 # browser is set to start up in firefox using the compatible geckodriver.exe which is placed in the current path
 scrape_file = '../files/items_to_scrape.csv'
@@ -41,6 +42,7 @@ if ARGV.any?
         scraped_data << scrape_info.values
         count += 1
         puts "Count - #{count}"
+        binding.pry
       end
     end
     Excel.new_file(scraped_data)

@@ -4,11 +4,16 @@ require_relative 'excel_module'
 require_relative 'watch'
 require_relative 'watch_list'
 require 'pry'
+require 'gmail'
 
 # browser is set to start up in firefox using the compatible geckodriver.exe which is placed in the current path
-scrape_file = '../files/items_to_scrape.csv'
+scrape_file = '../files/test_to_scrape.csv'
 url_file = '../files/all_urls.csv'
 scraped_data = []
+user = ENV["GMAIL_USER"]
+password = ENV["GMAIL_PASS"]
+receiver = "albert.farhi5@gmail.com"
+output_file = '../files/results.xls'
 
 
 if ARGV.any?
@@ -33,19 +38,25 @@ if ARGV.any?
     watches_to_scrape.each do |watch|
       puts "Model: #{watch.model} Brand: #{watch.brand} Count: #{count}"
       matching_url = Scraper.match_to_url(watch, url_list)
-      count += 1
       if matching_url
         scrape_info = Scraper.scrape_watch(browser, matching_url)
         scrape_info["model"] = watch.model
         p scrape_info
-        FileAccessor.push_to_file('jomashop_other_results.csv', scrape_info.values)
+        # FileAccessor.push_to_file('jomashop_other_results.csv', scrape_info.values)
         scraped_data << scrape_info.values
-        count += 1
-        puts "Count - #{count}"
-        binding.pry
+        # puts "Count - #{count}"
       end
+      count += 1
     end
     Excel.new_file(scraped_data)
+    gmail = Gmail.connect(user, password)
+      gmail.deliver do
+        to receiver
+        subject "Joma Results"
+        text_part {body "Attached is an excel sheet of recent scrape data"}
+        add_file output_file
+      end
+    gmail.logout
   end
 
 end

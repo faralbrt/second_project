@@ -9,10 +9,10 @@ require 'gmail'
 # browser is set to start up in firefox using the compatible geckodriver.exe which is placed in the current path
 scrape_file = '../files/test_to_scrape.csv'
 url_file = '../files/all_urls.csv'
-scraped_data = []
 user = ENV["GMAIL_USER"]
 password = ENV["GMAIL_PASS"]
 receiver = "albert.farhi5@gmail.com"
+output_csv_file = '../files/jomashop_other_results.csv'
 output_file = '../files/results.xls'
 
 
@@ -32,22 +32,27 @@ if ARGV.any?
     browser.close
   when "scrape"
     count = 1
-    url_list = FileAccessor.parse_to_a(url_file)
+    url_list = FileAccessor.parse_to_a(url_file).flatten
+    FileAccessor.clear_file(output_csv_file)
     watch_list = WatchList.new
     watches_to_scrape = watch_list.load_watches(scrape_file)
     watches_to_scrape.each do |watch|
-      puts "Model: #{watch.model} Brand: #{watch.brand} Count: #{count}"
-      matching_url = Scraper.match_to_url(watch, url_list)
-      if matching_url
-        scrape_info = Scraper.scrape_watch(browser, matching_url)
-        scrape_info["model"] = watch.model
-        p scrape_info
-        # FileAccessor.push_to_file('jomashop_other_results.csv', scrape_info.values)
-        scraped_data << scrape_info.values
-        # puts "Count - #{count}"
+      begin
+        puts "Model: #{watch.model} Brand: #{watch.brand} Count: #{count}"
+        matching_url = Scraper.match_to_url(watch, url_list)
+        if matching_url
+          scrape_info = Scraper.scrape_watch(browser, matching_url)
+          scrape_info["model"] = watch.model
+          p scrape_info
+          FileAccessor.push_to_file(output_csv_file, scrape_info.values)
+        end
+        count += 1
+      rescue
+        puts "this one got an error"
       end
-      count += 1
     end
+    binding.pry
+    scraped_data = FileAccessor.parse_to_a(output_csv_file)
     Excel.new_file(scraped_data)
     gmail = Gmail.connect(user, password)
       gmail.deliver do

@@ -13,7 +13,7 @@ module FileAccessor
   def self.parse_to_a(filename)
     converted_rows = []
     CSV.foreach(filename) do |row|
-      converted_rows << row.first
+      converted_rows << row
     end
     converted_rows
   end
@@ -29,6 +29,12 @@ module FileAccessor
       arr.each do |str|
         csv_row << [str]
       end
+    end
+  end
+
+  def self.clear_file(filename)
+    CSV.open(filename, "w") do |csv_row|
+      csv_row << %w{title joma_model final_price availability shipping type_of_sale model}
     end
   end
 

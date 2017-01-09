@@ -7,7 +7,7 @@ require 'pry'
 require 'gmail'
 
 # browser is set to start up in firefox using the compatible geckodriver.exe which is placed in the current path
-scrape_file = '../files/test_to_scrape.csv'
+scrape_file = '../files/items_to_scrape.csv'
 url_file = '../files/all_urls.csv'
 user = ENV["GMAIL_USER"]
 password = ENV["GMAIL_PASS"]
@@ -51,7 +51,6 @@ if ARGV.any?
         puts "this one got an error"
       end
     end
-    binding.pry
     scraped_data = FileAccessor.parse_to_a(output_csv_file)
     Excel.new_file(scraped_data)
     gmail = Gmail.connect(user, password)

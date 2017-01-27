@@ -25,7 +25,7 @@ module FileAccessor
   end
 
   def self.overwrite_all(filename, arr)
-    CSV.open(filename, "a") do |csv_row|
+    CSV.open(filename, "w") do |csv_row|
       arr.each do |str|
         csv_row << [str]
       end

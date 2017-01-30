@@ -3,6 +3,7 @@ require_relative 'csv_module'
 require_relative 'excel_module'
 require_relative 'watch'
 require_relative 'watch_list'
+require_relative 'test'
 require 'pry'
 require 'gmail'
 
@@ -20,9 +21,9 @@ if ARGV.any?
 
   command = ARGV.first
   options = ARGV[1..-1]
-  browser = Scraper.create_browser
-  puts "Type anything to continue...(chance to turn off images in browser to speed up scraping)"
-  STDIN.gets.chomp
+  # browser = Scraper.create_browser
+  # puts "Type anything to continue...(chance to turn off images in browser to speed up scraping)"
+  # STDIN.gets.chomp
 
   case command
   when "update urls"
@@ -41,10 +42,13 @@ if ARGV.any?
         puts "Model: #{watch.model} Brand: #{watch.brand} Count: #{count}"
         matching_url = Scraper.match_to_url(watch, url_list)
         if matching_url
-          scrape_info = Scraper.scrape_watch(browser, matching_url)
-          scrape_info["model"] = watch.model
-          p scrape_info
-          FileAccessor.push_to_file(output_csv_file, scrape_info.values)
+          response = get(matching_url)
+          p Scraper.parse_product_info(response)
+          sleep 3
+          # scrape_info = Scraper.scrape_watch(browser, matching_url)
+          # scrape_info["model"] = watch.model
+          # p scrape_info
+          # FileAccessor.push_to_file(output_csv_file, scrape_info.values)
         end
         count += 1
       rescue

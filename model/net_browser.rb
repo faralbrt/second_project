@@ -3,7 +3,7 @@ require 'uri'
 
 class NetBrowser
 
-  def self.get(url)
+  def get(url)
     uri = URI.parse(url)
     request = Net::HTTP::Get.new(uri)
     request["Pragma"] = "no-cache"

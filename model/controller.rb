@@ -31,13 +31,14 @@ OUTPUT_FILE = '../files/results.xls'
     url_list = fetcher.scrape_all_urls
     FileAccessor.overwrite_all(URL_FILE, url_list)
   when "scrape"
+    start_time = Time.now
     count = 1
     url_list = FileAccessor.parse_to_a(URL_FILE).flatten
     url_matcher = UrlMatcher.new(url_list)
     FileAccessor.clear_file(OUTPUT_CSV_FILE)
     watch_list = WatchList.new
     watches_to_scrape = watch_list.load_watches(SCRAPE_FILE)
-    browser = NetBrowser.new
+    browser = WatirBrowser.new
     parser = ProductParser.new
     watches_to_scrape.each do |watch|
       begin
@@ -46,7 +47,6 @@ OUTPUT_FILE = '../files/results.xls'
         if matching_url
           response = browser.get(matching_url)
           scrape_info = parser.parse_product_info(response)
-          sleep(rand(2.0..4.0))
           scrape_info["model"] = watch.model
           p scrape_info
           FileAccessor.push_to_file(OUTPUT_CSV_FILE, scrape_info.values)
@@ -56,6 +56,8 @@ OUTPUT_FILE = '../files/results.xls'
         puts "this one got an error"
       end
     end
+    time_lapsed = (start_time - Time.now)/60
+    puts "It took #{time_lapsed.to_i} minutes to complete"
     scraped_data = FileAccessor.parse_to_a(OUTPUT_CSV_FILE)
     Excel.new_file(scraped_data)
     binding.pry

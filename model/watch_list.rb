@@ -9,9 +9,9 @@ class WatchList
     watches_arr = FileAccessor.parse_to_hash(filename)
 
     watches_arr.each do |watch|
-      @watches << Watch.new(watch)
+      watches << Watch.new(watch)
     end
-    @watches
+    watches
   end
 
 end

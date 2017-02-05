@@ -1,8 +1,9 @@
 require_relative 'url_fetcher'
 require_relative 'url_matcher'
 require_relative 'net_browser'
-require_relative 'product_parser'
 require_relative 'watir_browser'
+require_relative 'uri_browser'
+require_relative 'product_parser'
 require_relative 'csv_module'
 require_relative 'excel_module'
 require_relative 'watch'
@@ -12,7 +13,7 @@ require 'pry'
 require 'gmail'
 
 # browser is set to start up in firefox using the compatible geckodriver.exe which is placed in the current path
-SCRAPE_FILE = '../files/test_to_scrape.csv'
+SCRAPE_FILE = '../files/items_to_scrape.csv'
 URL_FILE = '../files/all_urls.csv'
 USER = ENV["GMAIL_USER"]
 PASSWORD = ENV["GMAIL_PASS"]
@@ -38,23 +39,25 @@ OUTPUT_FILE = '../files/results.xls'
     FileAccessor.clear_file(OUTPUT_CSV_FILE)
     watch_list = WatchList.new
     watches_to_scrape = watch_list.load_watches(SCRAPE_FILE)
-    browser = WatirBrowser.new
+    browser = UriBrowser.new
     parser = ProductParser.new
     watches_to_scrape.each do |watch|
       begin
         puts "Model: #{watch.model} Brand: #{watch.brand} Count: #{count}"
         matching_url = url_matcher.find_url(watch)
         if matching_url
+          retries ||= 0
           response = browser.get(matching_url)
           scrape_info = parser.parse_product_info(response)
           scrape_info["model"] = watch.model
           p scrape_info
           FileAccessor.push_to_file(OUTPUT_CSV_FILE, scrape_info.values)
         end
-        count += 1
       rescue
-        puts "this one got an error"
+        retry if (retries += 1) < 50
+        puts "Error *** Count: #{count}"
       end
+      count += 1
     end
     time_lapsed = (start_time - Time.now)/60
     puts "It took #{time_lapsed.to_i} minutes to complete"
@@ -65,7 +68,7 @@ OUTPUT_FILE = '../files/results.xls'
       gmail.deliver do
         to RECEIVER
         subject "Joma Results"
-        text_part {body "Attached is an excel sheet of recent scrape data"}
+        text_part {body "Attached is an excel sheet of recent scrape data #{time_lapsed.to_i}"}
         add_file OUTPUT_FILE
       end
     gmail.logout

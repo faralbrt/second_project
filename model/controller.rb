@@ -1,66 +1,75 @@
-require_relative 'scraper_module'
+require_relative 'url_fetcher'
+require_relative 'url_matcher'
+require_relative 'net_browser'
+require_relative 'watir_browser'
+require_relative 'uri_browser'
+require_relative 'product_parser'
 require_relative 'csv_module'
 require_relative 'excel_module'
 require_relative 'watch'
 require_relative 'watch_list'
+require_relative 'url_matcher'
 require 'pry'
 require 'gmail'
 
 # browser is set to start up in firefox using the compatible geckodriver.exe which is placed in the current path
-scrape_file = '../files/items_to_scrape.csv'
-url_file = '../files/all_urls.csv'
-user = ENV["GMAIL_USER"]
-password = ENV["GMAIL_PASS"]
-receiver = "albert.farhi5@gmail.com"
-output_csv_file = '../files/jomashop_other_results.csv'
-output_file = '../files/results.xls'
+SCRAPE_FILE = '../files/items_to_scrape.csv'
+URL_FILE = '../files/all_urls.csv'
+USER = ENV["GMAIL_USER"]
+PASSWORD = ENV["GMAIL_PASS"]
+RECEIVER = "albert.farhi5@gmail.com"
+OUTPUT_CSV_FILE = '../files/jomashop_other_results.csv'
+OUTPUT_FILE = '../files/results.xls'
 
-
-if ARGV.any?
 
   command = ARGV.first
   options = ARGV[1..-1]
-  browser = Scraper.create_browser
-  puts "Type anything to continue...(chance to turn off images in browser to speed up scraping)"
-  STDIN.gets.chomp
 
   case command
   when "update urls"
-    puts "Estimated Run Time: 5 minutes"
-    url_list = Scraper.scrape_all_urls(browser)
-    FileAccessor.overwrite_all(url_file, url_list)
-    browser.close
+    puts "Estimated Run Time: 2 minutes"
+    fetcher = UrlFetcher.new
+    url_list = fetcher.scrape_all_urls
+    FileAccessor.overwrite_all(URL_FILE, url_list)
   when "scrape"
+    start_time = Time.now
     count = 1
-    url_list = FileAccessor.parse_to_a(url_file).flatten
-    FileAccessor.clear_file(output_csv_file)
+    url_list = FileAccessor.parse_to_a(URL_FILE).flatten
+    url_matcher = UrlMatcher.new(url_list)
+    FileAccessor.clear_file(OUTPUT_CSV_FILE)
     watch_list = WatchList.new
-    watches_to_scrape = watch_list.load_watches(scrape_file)
+    watches_to_scrape = watch_list.load_watches(SCRAPE_FILE)
+    browser = UriBrowser.new
+    parser = ProductParser.new
     watches_to_scrape.each do |watch|
       begin
         puts "Model: #{watch.model} Brand: #{watch.brand} Count: #{count}"
-        matching_url = Scraper.match_to_url(watch, url_list)
+        matching_url = url_matcher.find_url(watch)
         if matching_url
-          scrape_info = Scraper.scrape_watch(browser, matching_url)
+          retries ||= 0
+          response = browser.get(matching_url)
+          scrape_info = parser.parse_product_info(response)
           scrape_info["model"] = watch.model
           p scrape_info
-          FileAccessor.push_to_file(output_csv_file, scrape_info.values)
+          FileAccessor.push_to_file(OUTPUT_CSV_FILE, scrape_info.values)
         end
-        count += 1
       rescue
-        puts "this one got an error"
+        retry if (retries += 1) < 50
+        puts "Error *** Count: #{count}"
       end
+      count += 1
     end
-    scraped_data = FileAccessor.parse_to_a(output_csv_file)
+    time_lapsed = (start_time - Time.now)/60
+    puts "It took #{time_lapsed.to_i} minutes to complete"
+    scraped_data = FileAccessor.parse_to_a(OUTPUT_CSV_FILE)
     Excel.new_file(scraped_data)
-    gmail = Gmail.connect(user, password)
+    binding.pry
+    gmail = Gmail.connect(USER, PASSWORD)
       gmail.deliver do
-        to receiver
+        to RECEIVER
         subject "Joma Results"
-        text_part {body "Attached is an excel sheet of recent scrape data"}
-        add_file output_file
+        text_part {body "Attached is an excel sheet of recent scrape data #{time_lapsed.to_i}"}
+        add_file OUTPUT_FILE
       end
     gmail.logout
   end
-
-end

@@ -13,13 +13,13 @@ require 'pry'
 require 'gmail'
 
 # browser is set to start up in firefox using the compatible geckodriver.exe which is placed in the current path
-SCRAPE_FILE = '../files/items_to_scrape.csv'
-URL_FILE = '../files/all_urls.csv'
+SCRAPE_FILE     = File.join(Dir.home, '/second_project/files/items_to_scrape.csv')
+URL_FILE        = File.join(Dir.home, '/second_project/files/all_urls.csv')
+OUTPUT_CSV_FILE = File.join(Dir.home, '/second_project/files/jomashop_other_results.csv')
+OUTPUT_FILE     = File.join(Dir.home, '/second_project/files/results.xls')
 USER = ENV["GMAIL_USER"]
 PASSWORD = ENV["GMAIL_PASS"]
 RECEIVER = "albert.farhi5@gmail.com"
-OUTPUT_CSV_FILE = '../files/jomashop_other_results.csv'
-OUTPUT_FILE = '../files/results.xls'
 
 
   command = ARGV.first

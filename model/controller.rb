@@ -63,7 +63,6 @@ RECEIVER = "albert.farhi5@gmail.com"
     puts "It took #{time_lapsed.to_i} minutes to complete"
     scraped_data = FileAccessor.parse_to_a(OUTPUT_CSV_FILE)
     Excel.new_file(scraped_data)
-    binding.pry
     gmail = Gmail.connect(USER, PASSWORD)
       gmail.deliver do
         to RECEIVER

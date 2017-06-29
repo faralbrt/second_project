@@ -1,7 +1,7 @@
 require 'spreadsheet'
 
 module Excel
-  @file = '../files/results.xls'
+  @file = File.join(Dir.home, '/second_project/files/results.xls')
   # @headers = %w{title joma_model final_price availability shipping type_of_sale model}
   @seed_data = [["hello"], ["the name is"], ["Albert"]]
 

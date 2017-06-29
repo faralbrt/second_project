@@ -11,7 +11,7 @@ class UrlFetcher
   def scrape_all_urls
     count = 1
     loop do
-      page = @browser.get("http://www.jomashop.com/media/sitemaps/sitemap_00#{count}.xml")
+      page = @browser.get("https://www.jomashop.com/media/sitemaps/sitemap_00#{count}.xml")
       @parsed_page = Nokogiri::HTML.parse(page)
       product_urls = parse_product_urls
       break if product_urls.empty?
